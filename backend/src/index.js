@@ -1,7 +1,13 @@
-import expess from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+
+import expess from 'express';
 import cors from 'cors';
 import { connectDB } from './config/db.js';
+import authRoutes from  './routes/authRoutes.js';
+import expenseRoutes from './routes/expenseRoutes.js';
+import {errorHandler} from './middleware/errorMiddleware.js';
 
 // CONFIG
 dotenv.config();
@@ -20,9 +26,9 @@ connectDB();
 
 
 // API ENDPOINTS
-app.get('/', (req, res) => {
-    res.status(200).send('Hello World');
-});
+app.use('/api/auth', authRoutes);
+app.use('/api/expenses', expenseRoutes);
+app.use(errorHandler); // Error handling middleware
 
 // LISTENER
 const PORT = process.env.PORT || 3000;
