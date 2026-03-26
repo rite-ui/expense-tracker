@@ -19,7 +19,7 @@ import mongoose from "mongoose";
     type: {
         type: String,
         required:true,
-        enum : ["Expense", "Income"],
+        enum : ["expense", "income"],
     },
     category: {
         type: String,

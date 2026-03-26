@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AuthProvider } from './context/AuthContext'
-import {useAuth} from './hooks/useAuth'
+import { useAuth } from './hooks/useAuth'
 import { ThemeProvider } from './context/ThemeContext'
 import { useTheme } from './hooks/useTheme'
 import { useExpenses } from './hooks/useExpenses'
@@ -24,12 +24,25 @@ function AppShell() {
   const [page,    setPage]    = useState('dashboard')
   const [modal,   setModal]   = useState(false)
   const [editing, setEditing] = useState(null)
-  const { addExpense, editExpense, removeExpense } = useExpenses()
+
+  // 1. Saara data yahan hook se nikaalein (Takki single source of truth rahe)
+  const { 
+    expenses, 
+    summary, 
+    breakdown, 
+    loading, 
+    totalIncome, 
+    totalExpense, 
+    balance,
+    addExpense, 
+    editExpense, 
+    removeExpense 
+  } = useExpenses()
 
   if (!auth) return <AuthPage />
 
   const openEdit   = (tx) => { setEditing(tx);   setModal(true)  }
-  const closeModal = ()   => { setModal(false);   setEditing(null) }
+  const closeModal = ()   => { setModal(false);  setEditing(null) }
 
   const handleSave = async (form) => {
     if (editing) await editExpense(editing._id, form)
@@ -79,10 +92,32 @@ function AppShell() {
           </div>
         </div>
 
-        {/* Pages */}
-        {page === 'dashboard'    && <DashboardPage    setPage={setPage} openEdit={openEdit} onDelete={handleDelete} />}
-        {page === 'transactions' && <TransactionsPage openEdit={openEdit} onDelete={handleDelete} />}
-        {page === 'analytics'    && <AnalyticsPage />}
+        {/* 2. Pages ko saara data as PROPS bhej rahe hain */}
+        {page === 'dashboard' && (
+          <DashboardPage 
+            setPage={setPage} 
+            openEdit={openEdit} 
+            onDelete={handleDelete}
+            expenses={expenses}
+            summary={summary}
+            breakdown={breakdown}
+            loading={loading}
+            totalIncome={totalIncome}
+            totalExpense={totalExpense}
+            balance={balance}
+          />
+        )}
+        
+        {page === 'transactions' && (
+          <TransactionsPage 
+            openEdit={openEdit} 
+            onDelete={handleDelete} 
+            expenses={expenses}
+            loading={loading}
+          />
+        )}
+
+        {page === 'analytics' && <AnalyticsPage />}
       </main>
 
       {modal && (

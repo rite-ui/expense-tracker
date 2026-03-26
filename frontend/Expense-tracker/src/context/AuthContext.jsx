@@ -18,12 +18,12 @@ export const AuthProvider = ({ children }) => {
     const register = async ({name, email, password}) => {
         try {
             setLoading(true);
-            const { data } = await registerUser(name, email, password);
+            const { data } = await registerUser({username:name, email, password});
 
-            if (!data) throw new Error("No data received");
+            if (!data?.token) throw new Error("No token received");
 
-            localStorage.setItem('expensio_auth', JSON.stringify(data));
-            setAuth(data);
+            localStorage.setItem('expensio_auth', JSON.stringify( {token: data.token }));
+            setAuth({ token: data.token });
         } catch (error) {
             console.error("Register Error:", error.message);
         } finally {
@@ -37,10 +37,10 @@ export const AuthProvider = ({ children }) => {
             setLoading(true);
             const { data } = await loginUser({email, password});
 
-            if (!data) throw new Error("Invalid credentials");
+            if (!data?.token) throw new Error("No token received");
 
-            localStorage.setItem('expensio_auth', JSON.stringify(data));
-            setAuth(data);
+            localStorage.setItem('expensio_auth', JSON.stringify({ token: data.token }));
+             setAuth({ token: data.token });
         } catch (error) {
             console.error("Login Error:", error.message);
         } finally {

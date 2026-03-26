@@ -28,7 +28,7 @@ router.route('/:id')
 router.get('/summary/monthly', getMonthlySummary);
 
 // Get category breakdown of expenses
-router.get('/summary/categories', getCategoryBreakdown);
+router.get('/summary/category', getCategoryBreakdown);
 
 // Export expenses as CSV
 router.get('/export/csv', exportExpensesCSV);

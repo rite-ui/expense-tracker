@@ -4,12 +4,13 @@ import { NAV_ITEMS } from '../../utils/constants'
 import { getInitial } from '../../utils/formatters'
 
 export default function Sidebar({ page, setPage }) {
-  const { dark, toggle } = useTheme()
+  const { dark, toggleTheme } = useTheme()
   const { auth, logout } = useAuth()
+  const isDark = dark === 'dark';
 
   return (
     <aside className={`fixed top-0 left-0 h-full w-55 flex flex-col z-50 border-r transition-colors
-      ${dark
+      ${isDark
         ? 'bg-dark-surface border-dark-border'
         : 'bg-white border-light-border shadow-sm'
       }`}>
@@ -17,14 +18,18 @@ export default function Sidebar({ page, setPage }) {
       {/* Logo */}
       <div className="px-6 py-6 mb-2">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl gradient-brand flex items-center justify-center shadow-glow-brand">
-            <span className="text-white font-extrabold text-sm">E</span>
-          </div>
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all
+          ${isDark 
+            ? 'bg-brand shadow-[0_0_15px_rgba(108,99,255,0.4)]' 
+            : 'bg-brand shadow-sm'
+           }`}>
+  <span className="text-white font-extrabold text-sm">E</span>
+</div>
           <div>
-            <div className={`text-base font-extrabold tracking-tight leading-none ${dark ? 'text-white' : 'text-gray-900'}`}>
+            <div className={`text-base font-extrabold tracking-tight leading-none ${isDark ? 'text-white' : 'text-gray-900'}`}>
               Expensio
             </div>
-            <div className={`text-[10px] font-mono mt-0.5 ${dark ? 'text-white/30' : 'text-gray-400'}`}>
+            <div className={`text-[10px] font-mono mt-0.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
               smart tracker
             </div>
           </div>
@@ -34,7 +39,7 @@ export default function Sidebar({ page, setPage }) {
       {/* Nav */}
       <nav className="flex flex-col gap-1 px-3 flex-1">
         <div className={`text-[9px] font-bold tracking-[1.5px] uppercase font-mono px-3 mb-2
-          ${dark ? 'text-white/25' : 'text-gray-400'}`}>
+          ${isDark ? 'text-white/25' : 'text-gray-400'}`}>
           Menu
         </div>
 
@@ -47,10 +52,10 @@ export default function Sidebar({ page, setPage }) {
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border w-full text-left
                 animate-slideIn animate-stagger-${i + 1}
                 ${isActive
-                  ? dark
+                  ? isDark
                     ? 'bg-brand/10 text-brand-light border-brand/20'
                     : 'bg-brand/10 text-brand border-brand/20'
-                  : dark
+                  : isDark
                     ? 'text-white/50 border-transparent hover:bg-white/5 hover:text-white'
                     : 'text-gray-500 border-transparent hover:bg-gray-50 hover:text-gray-800'
                 }`}
@@ -58,7 +63,7 @@ export default function Sidebar({ page, setPage }) {
               <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 transition-all
                 ${isActive
                   ? 'bg-brand text-white shadow-glow-brand'
-                  : dark ? 'bg-white/5' : 'bg-gray-100'
+                  : isDark ? 'bg-white/5' : 'bg-gray-100'
                 }`}>
                 {n.icon}
               </span>
@@ -72,38 +77,38 @@ export default function Sidebar({ page, setPage }) {
       </nav>
 
       {/* Bottom */}
-      <div className={`p-4 border-t ${dark ? 'border-dark-border' : 'border-light-border'}`}>
+      <div className={`p-4 border-t ${isDark ? 'border-dark-border' : 'border-light-border'}`}>
         {/* Theme Toggle */}
         <button
-          onClick={toggle}
+          onClick={toggleTheme}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium border transition-all mb-3
-            ${dark
+            ${isDark
               ? 'border-dark-border bg-white/5 text-white/50 hover:text-white hover:border-white/20'
               : 'border-light-border bg-gray-50 text-gray-500 hover:text-gray-800 hover:border-gray-300'
             }`}
         >
-          <span className="text-base">{dark ? '☀️' : '🌙'}</span>
-          {dark ? 'Light Mode' : 'Dark Mode'}
+          <span className="text-base">{isDark ? '☀️' : '🌙'}</span>
+          {isDark ? 'Light Mode' : 'Dark Mode'}
         </button>
 
         {/* User Badge */}
         <div className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border
-          ${dark ? 'border-dark-border bg-white/5' : 'border-light-border bg-gray-50'}`}>
+          ${isDark ? 'border-dark-border bg-white/5' : 'border-light-border bg-gray-50'}`}>
           <div className="w-8 h-8 rounded-xl gradient-brand flex items-center justify-center text-white text-xs font-bold shrink-0">
             {getInitial(auth?.name)}
           </div>
           <div className="flex-1 min-w-0">
-            <div className={`text-xs font-bold truncate ${dark ? 'text-white' : 'text-gray-800'}`}>
+            <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-gray-800'}`}>
               {auth?.name || 'User'}
             </div>
-            <div className={`text-[10px] font-mono ${dark ? 'text-white/30' : 'text-gray-400'}`}>
+            <div className={`text-[10px] font-mono ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
               member
             </div>
           </div>
           <button
             onClick={logout}
             title="Logout"
-            className={`text-sm transition-colors ${dark ? 'text-white/25 hover:text-expense' : 'text-gray-300 hover:text-expense'}`}
+            className={`text-sm transition-colors ${isDark ? 'text-white/25 hover:text-expense' : 'text-gray-300 hover:text-expense'}`}
           >⏻</button>
         </div>
       </div>
