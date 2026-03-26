@@ -4,12 +4,18 @@ import { useAuth } from './hooks/useAuth'
 import { ThemeProvider } from './context/ThemeContext'
 import { useTheme } from './hooks/useTheme'
 import { useExpenses } from './hooks/useExpenses'
+
+// Layout & Components
 import Sidebar from './components/layout/Sidebar'
+import ExpenseModal from './components/ui/ExpenseModal'
+
+// Pages
 import AuthPage from './pages/AuthPage'
 import DashboardPage from './pages/DashboardPage'
 import TransactionsPage from './pages/TransactionsPage'
 import AnalyticsPage from './pages/AnalyticsPage'
-import ExpenseModal from './components/ui/ExpenseModal'
+
+// Services
 import { exportCSV } from './services/expenseService'
 
 const PAGE_META = {
@@ -21,112 +27,167 @@ const PAGE_META = {
 function AppShell() {
   const { auth } = useAuth()
   const { dark } = useTheme()
-  const [page,    setPage]    = useState('dashboard')
-  const [modal,   setModal]   = useState(false)
-  const [editing, setEditing] = useState(null)
+  const isDark = dark === 'dark' || dark === true
 
-  // 1. Saara data yahan hook se nikaalein (Takki single source of truth rahe)
+  // State Management
+  const [page, setPage] = useState('dashboard')
+  const [modal, setModal] = useState(false)
+  const [editing, setEditing] = useState(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Custom Hook for Data
   const { 
-    expenses, 
-    summary, 
-    breakdown, 
-    loading, 
-    totalIncome, 
-    totalExpense, 
-    balance,
-    addExpense, 
-    editExpense, 
-    removeExpense 
+    expenses, summary, breakdown, loading, 
+    totalIncome, totalExpense, balance,
+    addExpense, editExpense, removeExpense 
   } = useExpenses()
 
+  // Auth Guard
   if (!auth) return <AuthPage />
 
-  const openEdit   = (tx) => { setEditing(tx);   setModal(true)  }
-  const closeModal = ()   => { setModal(false);  setEditing(null) }
+  // Handlers
+  const openEdit   = (tx) => { setEditing(tx); setModal(true) }
+  const closeModal = ()   => { setModal(false); setEditing(null) }
 
   const handleSave = async (form) => {
-    if (editing) await editExpense(editing._id, form)
-    else         await addExpense(form)
-    closeModal()
+    try {
+      if (editing) await editExpense(editing._id, form)
+      else await addExpense(form)
+      closeModal()
+    } catch (err) {
+      console.error("Failed to save transaction:", err)
+    }
   }
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this transaction?')) return
-    await removeExpense(id)
+    if (window.confirm('Are you sure you want to delete this?')) {
+      await removeExpense(id)
+    }
   }
 
-  const { title, sub } = PAGE_META[page]
+  const meta = PAGE_META[page] || PAGE_META.dashboard
 
   return (
-    <div className={`flex min-h-screen transition-colors ${dark ? 'bg-dark-bg' : 'bg-light-bg'}`}>
-      <Sidebar page={page} setPage={setPage} />
+    <div className={`flex min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#0f0f1a]' : 'bg-[#f8fafc]'}`}>
+      
+      {/* 1. Sidebar (Mobile + Desktop) */}
+      <Sidebar 
+        page={page} 
+        setPage={(p) => { setPage(p); setSidebarOpen(false); }} 
+        isOpen={sidebarOpen} 
+        setIsOpen={setSidebarOpen} 
+      />
 
-      <main className="ml-55 flex-1 px-8 py-7 min-h-screen">
-        {/* Top Header */}
-        <div className="flex items-start justify-between mb-7 gap-4 flex-wrap animate-slideIn">
-          <div>
-            <h1 className={`text-2xl font-extrabold tracking-tight ${dark ? 'text-white' : 'text-gray-900'}`}>
-              {title}
-            </h1>
-            <p className={`text-xs font-mono mt-1 ${dark ? 'text-white/35' : 'text-gray-400'}`}>{sub}</p>
+      {/* 2. Mobile Backdrop Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* 3. Main Content Area */}
+      <main className="flex-1 transition-all duration-300 px-4 py-6 md:px-10 md:py-8 md:ml-60 w-full max-w-400 mx-auto">
+        
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-5 animate-slideIn">
+          <div className="flex items-center gap-4">
+            {/* Hamburger for Mobile */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className={`p-2.5 rounded-xl border md:hidden transition-all active:scale-90 ${
+                isDark ? 'border-white/10 bg-white/5 text-white' : 'border-gray-200 bg-white text-gray-700 shadow-sm'
+              }`}
+            >
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            <div>
+              <h1 className={`text-2xl font-black tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {meta.title}
+              </h1>
+              <p className={`text-[11px] font-mono mt-0.5 ${isDark ? 'text-white/35' : 'text-gray-400'}`}>
+                {meta.sub}
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          {/* Global Actions */}
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               onClick={exportCSV}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all
-                ${dark
-                  ? 'border-dark-border bg-dark-card text-white/50 hover:text-income hover:border-income/30 hover:bg-income/5'
-                  : 'border-light-border bg-white text-gray-500 hover:text-income hover:border-income/30 shadow-sm'
-                }`}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border transition-all ${
+                isDark
+                  ? 'border-white/10 bg-white/5 text-white/50 hover:text-white'
+                  : 'border-gray-200 bg-white text-gray-500 shadow-sm hover:border-gray-300'
+              }`}
             >
-              <span>⬇</span> Export CSV
+              Download CSV
             </button>
 
             <button
               onClick={() => { setEditing(null); setModal(true) }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-brand hover:bg-brand-light hover:shadow-glow-brand hover:-translate-y-px active:scale-[0.98] transition-all"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-brand hover:shadow-[0_0_20px_rgba(108,99,255,0.3)] transition-all active:scale-95"
             >
-              <span className="text-base">+</span> Add Transaction
+              + New Transaction
             </button>
           </div>
         </div>
 
-        {/* 2. Pages ko saara data as PROPS bhej rahe hain */}
-        {page === 'dashboard' && (
-          <DashboardPage 
-            setPage={setPage} 
-            openEdit={openEdit} 
-            onDelete={handleDelete}
-            expenses={expenses}
-            summary={summary}
-            breakdown={breakdown}
-            loading={loading}
-            totalIncome={totalIncome}
-            totalExpense={totalExpense}
-            balance={balance}
-          />
-        )}
-        
-        {page === 'transactions' && (
-          <TransactionsPage 
-            openEdit={openEdit} 
-            onDelete={handleDelete} 
-            expenses={expenses}
-            loading={loading}
-          />
-        )}
+        {/* 4. Page Routing Logic */}
+        <div className="animate-fadeIn min-h-[70vh]">
+          {page === 'dashboard' && (
+            <DashboardPage 
+              expenses={expenses}
+              summary={summary}
+              breakdown={breakdown}
+              loading={loading}
+              totalIncome={totalIncome}
+              totalExpense={totalExpense}
+              balance={balance}
+              openEdit={openEdit}
+              onDelete={handleDelete}
+              setPage={setPage}
+            />
+          )}
+          
+          {page === 'transactions' && (
+            <TransactionsPage 
+              expenses={expenses}
+              loading={loading}
+              openEdit={openEdit}
+              onDelete={handleDelete}
+            />
+          )}
 
-        {page === 'analytics' && <AnalyticsPage />}
+          {page === 'analytics' && (
+            <AnalyticsPage 
+              expenses={expenses}
+              summary={summary}
+              breakdown={breakdown}
+              loading={loading}
+              totalIncome={totalIncome}
+              totalExpense={totalExpense}
+            />
+          )}
+        </div>
       </main>
 
+      {/* 5. Global Modal */}
       {modal && (
-        <ExpenseModal editing={editing} onClose={closeModal} onSave={handleSave} />
+        <ExpenseModal 
+          editing={editing} 
+          onClose={closeModal} 
+          onSave={handleSave} 
+        />
       )}
     </div>
   )
 }
 
+// Wrapper to provide Context
 export default function App() {
   return (
     <ThemeProvider>
