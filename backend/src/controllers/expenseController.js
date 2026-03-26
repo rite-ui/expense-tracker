@@ -66,7 +66,7 @@ export const deleteExpense = asyncHandler (async (req, res) => {
         res.status(401);
         throw new Error('Not authorized');
     }
-    await Expense.deleteOne();
+    await Expense.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted successfully' });
 })
 
@@ -76,7 +76,7 @@ export const getMonthlySummary = asyncHandler (async (req, res)=> {
         { $match: { userId: req.user._id } },
         { $group: {
             _id: { month: { $month: "$date" }, year: { $year: "$date" }, type: "$type" },
-            totalAmount: { $sum: "$amount" }
+            total: { $sum: "$amount" }
         }},
         { $sort: { "_id.year": -1, "_id.month": -1 } }
     ])
@@ -86,19 +86,19 @@ export const getMonthlySummary = asyncHandler (async (req, res)=> {
 //@Get category breakdown
 export const getCategoryBreakdown = asyncHandler (async (req, res)=> {
     const breakdown = await Expense.aggregate([
-        { $match: { userId: req.user._id , type: "Expense" } },
+        { $match: { userId: req.user._id , type: "expense" } },
         { $group: {
             _id: "$category",
-            totalAmount: { $sum: "$amount" }
+            total: { $sum: "$amount" }
         }},
-        { $sort: { totalAmount: -1 } }
+        { $sort: { total: -1 } }
     ])
     res.json(breakdown);
 })
 
 //@Get export expenses as CSV
 export const exportExpensesCSV = asyncHandler (async (req, res)=> {
-    const expenses = await Expense.find({user: req.user._id}).sort({date: -1});
+    const expenses = await Expense.find({userId: req.user._id}).sort({date: -1});
 
     const fields = ['title', 'amount', 'category', 'date', 'type', 'description'];
     const parser = new Parser({ fields });

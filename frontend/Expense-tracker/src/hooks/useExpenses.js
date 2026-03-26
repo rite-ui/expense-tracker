@@ -20,21 +20,23 @@ const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-        const [e,s,b] = await Promise.all([
-            getExpenses(),
-            getCategoryBreakdown(),
-            getMonthlySummary()
+        const [respExpenses, respBreakdown, respSummary] = await Promise.all([
+            getExpenses(),           // index 0
+            getCategoryBreakdown(),  // index 1
+            getMonthlySummary()      // index 2
         ]);
-        setExpenses(e.data);
-        setBreakdown(s.data);
-        setSummary(b.data);
+
+        // ✅ Sahi assignment check karein:
+        setExpenses(respExpenses.data);
+        setBreakdown(respBreakdown.data); // Category data
+        setSummary(respSummary.data);      // Monthly Trend data
+        
     } catch (err) {
-        setError(err.response?.data?.message || err.message || 'An error occurred while loading expenses.');
+        setError(err.response?.data?.message || err.message || 'Error loading data');
     } finally {
         setLoading(false);
-
     }
-},[]);
+}, []);
 
 useEffect(()=> {load()},[load]);
 
