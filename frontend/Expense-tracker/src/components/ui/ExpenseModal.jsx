@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTheme } from "../../hooks/useTheme";
-import { CATEGORIES, CAT_ICONS } from "../../utils/constants";
+// ✅ Sahi imports (purana CATEGORIES hata diya)
+import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, CAT_ICONS } from "../../utils/constants";
 
 const formatDateForInput = (date) => {
     if (!date) return "";
@@ -11,7 +12,7 @@ const DEFAULT = {
     title: "",
     amount: "",
     type: "expense",
-    category: "Food",
+    category: "Food", // Default expense category
     description: "",
     date: new Date().toISOString().split('T')[0],
 }
@@ -29,6 +30,12 @@ export default function ExpenseModal({ onClose, editing, onSave }) {
     const [error, setError] = useState("");
 
     const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
+
+    // ✅ Naya Logic: Jab Type change ho (Income/Expense), toh category bhi default par set ho jaye
+    const handleTypeChange = (newType) => {
+        const defaultCat = newType === 'income' ? 'Salary' : 'Food';
+        setForm(prev => ({ ...prev, type: newType, category: defaultCat }));
+    };
 
     const handleSubmit = async () => {
         if (!form.title.trim()) return setError("Title is required");
@@ -54,17 +61,14 @@ export default function ExpenseModal({ onClose, editing, onSave }) {
     const labelsCls = `text-[10px] font-bold tracking-[1.2px] uppercase font-mono ${isDark ? "text-white/35" : "text-gray-400"}`;
 
     return (
-        // ✅ added p-0 md:p-4 for better mobile fit
         <div className="fixed inset-0 z-1000 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-md animate-fadeIn"
              onClick={e => e.target === e.currentTarget && onClose()}>
 
-            {/* ✅ Responsive container: Full width on mobile, max-w-lg on desktop */}
             <div className={`w-full md:w-125 max-h-[92vh] md:max-h-[90vh] overflow-hidden flex flex-col rounded-t-3xl md:rounded-2xl border transition-all duration-300
                  ${isDark
                     ? "bg-[#1a1a2e] border-white/10 shadow-2xl"
                     : "bg-white border-gray-100 shadow-2xl"}`}>
 
-                {/* --- Sticky Header --- */}
                 <div className="flex items-start justify-between p-6 pb-4 border-b border-black/5 dark:border-white/5">
                     <div>
                         <h2 className={`text-lg font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -81,9 +85,7 @@ export default function ExpenseModal({ onClose, editing, onSave }) {
                     </button>
                 </div>
 
-                {/* --- Scrollable Body: Prevent keyboard cut-off --- */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar">
-                    
                     {error && (
                         <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-500 text-xs font-mono animate-shake">
                             ⚠️ {error}
@@ -95,7 +97,7 @@ export default function ExpenseModal({ onClose, editing, onSave }) {
                         {['income', 'expense'].map(t => (
                             <button
                                 key={t}
-                                onClick={() => set('type', t)}
+                                onClick={() => handleTypeChange(t)}
                                 className={`py-3.5 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2
                                 ${form.type === t
                                     ? t === 'income'
@@ -116,13 +118,12 @@ export default function ExpenseModal({ onClose, editing, onSave }) {
                             <label className={labelsCls}>Title</label>
                             <input
                                 className={inputCls}
-                                placeholder="e.g. Grocery Shopping"
+                                placeholder="e.g. Salary or Coffee"
                                 value={form.title}
                                 onChange={e => set('title', e.target.value)}
                             />
                         </div>
 
-                        {/* Amount & Date Grid - Stacks on very small screens */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="flex flex-col gap-1.5">
                                 <label className={labelsCls}>Amount</label>
@@ -155,7 +156,9 @@ export default function ExpenseModal({ onClose, editing, onSave }) {
                                     className={`${inputCls} appearance-none`}
                                     value={form.category}
                                     onChange={e => set('category', e.target.value)}>
-                                    {CATEGORIES.map(c => (
+                                    
+                                    {/* ✅ Type ke base par filter: Ab Income mein Food nahi dikhega */}
+                                    {(form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(c => (
                                         <option key={c} value={c} className={isDark ? 'bg-[#1a1a2e]' : 'bg-white'}>
                                             {c}
                                         </option>
@@ -179,7 +182,6 @@ export default function ExpenseModal({ onClose, editing, onSave }) {
                     </div>
                 </div>
 
-                {/* --- Sticky Footer Actions --- */}
                 <div className="p-6 border-t border-black/5 dark:border-white/5 flex gap-3">
                     <button onClick={onClose}
                         className={`flex-1 py-3.5 rounded-xl text-sm font-semibold border transition-all active:scale-95

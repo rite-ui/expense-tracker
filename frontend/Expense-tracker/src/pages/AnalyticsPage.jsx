@@ -2,7 +2,8 @@ import { useTheme } from '../hooks/useTheme'
 import { useExpenses } from '../hooks/useExpenses'
 import ChartTooltip from '../components/ui/ChartTooltip'
 import Spinner from '../components/ui/Spinner'
-import { MONTH_NAMES, CAT_COLORS, CAT_ICONS } from '../utils/constants'
+// ✅ INCOME_CATEGORIES ko add kiya gaya hai
+import { MONTH_NAMES, CAT_COLORS, CAT_ICONS, INCOME_CATEGORIES } from '../utils/constants'
 import { formatCurrency } from '../utils/formatters'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -13,24 +14,50 @@ export default function AnalyticsPage() {
   const { dark } = useTheme()
   const isDark = dark === 'dark'
 
-  const { expenses, summary, breakdown, loading, totalIncome, totalExpense } = useExpenses()
+  const { expenses, summary, breakdown, loading } = useExpenses()
+
+  // ✅ 1. Re-calculating Totals to ensure Salary is always Income
+  const calculatedIncome = expenses
+    .filter(e => e.type === 'income' || INCOME_CATEGORIES.includes(e.category))
+    .reduce((acc, curr) => acc + curr.amount, 0);
+
+  const calculatedExpense = expenses
+    .filter(e => e.type === 'expense' && !INCOME_CATEGORIES.includes(e.category))
+    .reduce((acc, curr) => acc + curr.amount, 0);
 
   const tickStyle = { fill: isDark ? 'rgba(255,255,255,0.3)' : '#9ca3af', fontSize: 10, fontFamily: 'DM Mono' }
   const gridColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)'
 
+  // ✅ 2. Bar Chart Data Fix (Salary -> Income Bar)
   const barData = (() => {
     const map = {}
     summary.forEach(s => {
       const key = `${MONTH_NAMES[s._id.month - 1]} '${String(s._id.year).slice(2)}`
       if (!map[key]) map[key] = { name: key, income: 0, expense: 0 }
-      map[key][s._id.type] = s.total
+      
+      if (INCOME_CATEGORIES.includes(s._id.category) || s._id.type === 'income') {
+        map[key].income += s.total
+      } else {
+        map[key].expense += s.total
+      }
     })
     return Object.values(map).slice(-6).reverse()
   })()
 
   const lineData = barData.map(d => ({ ...d, savings: (d.income || 0) - (d.expense || 0) }))
-  const pieData = breakdown.slice(0, 8).map(b => ({ name: b._id, value: b.total, color: CAT_COLORS[b._id] || '#94a3b8' }))
-  const savingsRate = totalIncome > 0 ? (((totalIncome - totalExpense) / totalIncome) * 100).toFixed(1) : 0
+
+  // ✅ 3. Filtered Breakdown (Excluding Income Categories for Charts/List)
+  const filteredBreakdown = breakdown.filter(b => !INCOME_CATEGORIES.includes(b._id))
+
+  const pieData = filteredBreakdown.slice(0, 8).map(b => ({ 
+    name: b._id, 
+    value: b.total, 
+    color: CAT_COLORS[b._id] || '#94a3b8' 
+  }))
+
+  const savingsRate = calculatedIncome > 0 
+    ? (((calculatedIncome - calculatedExpense) / calculatedIncome) * 100).toFixed(1) 
+    : 0
 
   const cardBase = `rounded-2xl border transition-all duration-300 ${
     isDark ? 'bg-[#1a1a2e] border-white/10' : 'bg-white border-gray-100 shadow-sm'
@@ -38,8 +65,8 @@ export default function AnalyticsPage() {
 
   const kpis = [
     { label: 'Savings Rate', value: `${savingsRate}%`, sub: 'of income', color: 'text-[#22c987]' },
-    { label: 'Avg / Tx', value: expenses.length ? formatCurrency(Math.round((totalIncome + totalExpense) / expenses.length)) : '₹0', sub: `${expenses.length} records`, color: 'text-[#6c63ff]' },
-    { label: 'Top Category', value: breakdown[0]?._id || '—', sub: breakdown[0] ? formatCurrency(breakdown[0].total) : 'no data', color: 'text-orange-500' },
+    { label: 'Avg / Tx', value: expenses.length ? formatCurrency(Math.round((calculatedIncome + calculatedExpense) / expenses.length)) : '₹0', sub: `${expenses.length} records`, color: 'text-[#6c63ff]' },
+    { label: 'Top Category', value: filteredBreakdown[0]?._id || '—', sub: filteredBreakdown[0] ? formatCurrency(filteredBreakdown[0].total) : 'no data', color: 'text-orange-500' },
     { label: 'Months', value: new Set(summary.map(s => `${s._id.month}-${s._id.year}`)).size, sub: 'tracked', color: 'text-sky-500' },
   ]
 
@@ -48,7 +75,7 @@ export default function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-6 animate-fadeIn pb-10 px-1 md:px-0">
 
-      {/* ✅ KPI Row: Mobile (2x2) | Desktop (4x1) */}
+      {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {kpis.map((k, i) => (
           <div key={i} className={`${cardBase} p-4 md:p-5 animate-slideUp`}>
@@ -61,7 +88,7 @@ export default function AnalyticsPage() {
         ))}
       </div>
 
-      {/* ✅ Bar + Area Charts: Mobile (Stacked) | Desktop (Side-by-side) */}
+      {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <div className={`${cardBase} p-4 md:p-5`}>
           <div className="mb-4">
@@ -105,7 +132,7 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* ✅ Pie + Breakdown: Mobile (Stacked) | Desktop (Side-by-side) */}
+      {/* Distribution & Category Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4 md:gap-6">
         <div className={`${cardBase} p-4 md:p-5`}>
           <h3 className={`text-sm font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-800'}`}>Distribution</h3>
@@ -130,9 +157,9 @@ export default function AnalyticsPage() {
         <div className={`${cardBase} p-4 md:p-5`}>
           <h3 className={`text-sm font-bold mb-5 ${isDark ? 'text-white' : 'text-gray-800'}`}>Category Breakdown</h3>
           <div className="flex flex-col gap-4">
-            {breakdown.length === 0 && <div className="text-center py-6 opacity-30 text-xs">No expense data found</div>}
-            {breakdown.map((b, i) => {
-              const pct = totalExpense > 0 ? ((b.total / totalExpense) * 100).toFixed(1) : 0
+            {filteredBreakdown.length === 0 && <div className="text-center py-6 opacity-30 text-xs">No expense data found</div>}
+            {filteredBreakdown.map((b, i) => {
+              const pct = calculatedExpense > 0 ? ((b.total / calculatedExpense) * 100).toFixed(1) : 0
               return (
                 <div key={i} className="flex items-center gap-3">
                   <span className="text-xl shrink-0">{CAT_ICONS[b._id] || '📦'}</span>

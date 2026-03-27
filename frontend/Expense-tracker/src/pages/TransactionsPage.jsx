@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useTheme } from '../hooks/useTheme'
 import TransactionItem from '../components/ui/TransactionItem'
 import Spinner from '../components/ui/Spinner'
-import { CATEGORIES } from '../utils/constants'
+// ✅ CATEGORIES ki jagah ALL_CATEGORIES import kiya
+import { ALL_CATEGORIES } from '../utils/constants'
 
 const FILTERS = [
   { key: 'all',     label: 'All'       },
@@ -18,6 +19,7 @@ export default function TransactionsPage({ openEdit, onDelete, expenses = [], lo
   const [category, setCategory] = useState('all')
   const [search,   setSearch]   = useState('')
 
+  // ✅ Updated Filter Logic: Data process karte waqt type aur category check karega
   const filtered = expenses.filter(tx => {
     const matchType     = type     === 'all' || tx.type     === type
     const matchCategory = category === 'all' || tx.category === category
@@ -41,9 +43,9 @@ export default function TransactionsPage({ openEdit, onDelete, expenses = [], lo
     <div className="flex flex-col gap-4 animate-fadeIn pb-10 w-full max-w-full overflow-x-hidden px-1">
 
       {/* ✅ Responsive Filter Bar */}
-      <div className={`${cardBase} p-4 md:px-5 md:py-4 flex flex-col lg:flex-row tems-stretch lg:items-center gap-4`}>
+      <div className={`${cardBase} p-4 md:px-5 md:py-4 flex flex-col lg:flex-row items-stretch lg:items-center gap-4`}>
         
-        {/* Search Input: Mobile pe full width */}
+        {/* Search Input */}
         <div className="relative w-full lg:flex-1">
           <input
             className={inputBase}
@@ -53,10 +55,10 @@ export default function TransactionsPage({ openEdit, onDelete, expenses = [], lo
           />
         </div>
 
-        {/* Filters Group: Mobile pe 2 rows mein split na ho isliye justify-between */}
-        <div className="flex  items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
+        {/* Filters Group */}
+        <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
           
-          {/* Type Buttons: Segmented control style */}
+          {/* Type Buttons */}
           <div className="flex gap-1 bg-black/5 dark:bg-white/5 p-1 rounded-xl border border-black/5 dark:border-white/5">
             {FILTERS.map(f => (
               <button
@@ -71,14 +73,14 @@ export default function TransactionsPage({ openEdit, onDelete, expenses = [], lo
             ))}
           </div>
 
-          {/* Category Dropdown */}
+          {/* Category Dropdown: Ab ALL_CATEGORIES use kar raha hai */}
           <select
             className={`${inputBase} cursor-pointer w-full lg:w-auto min-w-0 md:min-w-37.5`}
             value={category}
             onChange={e => setCategory(e.target.value)}
           >
-            <option value="all" className={isDark ? 'bg-[#1a1a2e]' : 'bg-white'}>Categories</option>
-            {CATEGORIES.map(c => (
+            <option value="all" className={isDark ? 'bg-[#1a1a2e]' : 'bg-white'}>All Categories</option>
+            {ALL_CATEGORIES.map(c => (
               <option key={c} value={c} className={isDark ? 'bg-[#1a1a2e]' : 'bg-white'}>{c}</option>
             ))}
           </select>

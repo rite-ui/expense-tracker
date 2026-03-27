@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
- const expenseSchema = new mongoose.Schema({
+const expenseSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -18,15 +18,19 @@ import mongoose from "mongoose";
     },
     type: {
         type: String,
-        required:true,
+        required: true,
         enum : ["expense", "income"],
     },
     category: {
         type: String,
-        enum : ["Food", "Transport", "Shopping","Bills", "Entertainment","Salary", "Utilities", "Health", "Other"],
-        required:true,
+        required: true,
         trim : true,
-        default: "General",
+        // ✅ Sabhi nayi categories ko yahan add kar diya gaya hai
+        enum : [
+            "Salary", "Freelance", "Investments", "Rental", "Gift", // Income cats
+            "Food", "Transport", "Shopping", "Bills", "Health", "Entertainment", "Other", "Utilities" // Expense cats
+        ],
+        default: "Other", // "General" ki jagah "Other" rakha hai jo list mein hai
     },
     date: {
         type: Date,
@@ -36,7 +40,6 @@ import mongoose from "mongoose";
         type: String,
         trim : true,
     }
-    
- },{timestamps: true});
+},{timestamps: true});
 
 export default mongoose.model('Expense', expenseSchema);

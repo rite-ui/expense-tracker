@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [auth, setAuth] = useState(() => {
         try {
+            // LocalStorage se data uthayein agar exist karta hai
             return JSON.parse(localStorage.getItem('expensio_auth')) || null;
         } catch {
             return null;
@@ -14,16 +15,25 @@ export const AuthProvider = ({ children }) => {
 
     const [loading, setLoading] = useState(false);
 
-    // 🔐 Register
+    // 🔐 Register Logic
     const register = async ({name, email, password}) => {
         try {
             setLoading(true);
-            const { data } = await registerUser({username:name, email, password});
+            // Backend username expect kar raha hai
+            const { data } = await registerUser({username: name, email, password});
 
             if (!data?.token) throw new Error("No token received");
 
-            localStorage.setItem('expensio_auth', JSON.stringify( {token: data.token }));
-            setAuth({ token: data.token });
+            // ✅ Backend response: { _id, username, email, token }
+            const authData = { 
+                token: data.token, 
+                name: data.username, // Sidebar ke liye username ko name map kiya
+                email: data.email,
+                _id: data._id
+            };
+
+            localStorage.setItem('expensio_auth', JSON.stringify(authData));
+            setAuth(authData);
         } catch (error) {
             console.error("Register Error:", error.message);
         } finally {
@@ -31,7 +41,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // 🔐 Login
+    // 🔐 Login Logic
     const login = async ({email, password}) => {
         try {
             setLoading(true);
@@ -39,8 +49,16 @@ export const AuthProvider = ({ children }) => {
 
             if (!data?.token) throw new Error("No token received");
 
-            localStorage.setItem('expensio_auth', JSON.stringify({ token: data.token }));
-             setAuth({ token: data.token });
+            // ✅ Backend data ko correctly format karke state mein save karein
+            const authData = { 
+                token: data.token, 
+                name: data.username, 
+                email: data.email,
+                _id: data._id
+            };
+
+            localStorage.setItem('expensio_auth', JSON.stringify(authData));
+            setAuth(authData);
         } catch (error) {
             console.error("Login Error:", error.message);
         } finally {
@@ -48,7 +66,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // 🚪 Logout
+    // 🚪 Logout Logic
     const logout = () => {
         localStorage.removeItem('expensio_auth');
         setAuth(null);
@@ -62,5 +80,3 @@ export const AuthProvider = ({ children }) => {
 };
 
 export default AuthContext;
-
-
