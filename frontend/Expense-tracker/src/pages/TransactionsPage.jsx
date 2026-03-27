@@ -38,10 +38,10 @@ export default function TransactionsPage({ openEdit, onDelete, expenses = [], lo
   if (loading) return <Spinner text="Loading transactions..." />
 
   return (
-    <div className="flex flex-col gap-4 animate-fadeIn pb-10">
+    <div className="flex flex-col gap-4 animate-fadeIn pb-10 w-full max-w-full overflow-x-hidden px-1">
 
       {/* ✅ Responsive Filter Bar */}
-      <div className={`${cardBase} p-4 md:px-5 md:py-4 flex flex-col lg:flex-row items-center gap-4`}>
+      <div className={`${cardBase} p-4 md:px-5 md:py-4 flex flex-col lg:flex-row tems-stretch lg:items-center gap-4`}>
         
         {/* Search Input: Mobile pe full width */}
         <div className="relative w-full lg:flex-1">
@@ -54,7 +54,7 @@ export default function TransactionsPage({ openEdit, onDelete, expenses = [], lo
         </div>
 
         {/* Filters Group: Mobile pe 2 rows mein split na ho isliye justify-between */}
-        <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
+        <div className="flex  items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
           
           {/* Type Buttons: Segmented control style */}
           <div className="flex gap-1 bg-black/5 dark:bg-white/5 p-1 rounded-xl border border-black/5 dark:border-white/5">
@@ -73,7 +73,7 @@ export default function TransactionsPage({ openEdit, onDelete, expenses = [], lo
 
           {/* Category Dropdown */}
           <select
-            className={`${inputBase} cursor-pointer w-auto! min-w-30 md:min-w-37.5`}
+            className={`${inputBase} cursor-pointer w-full lg:w-auto min-w-0 md:min-w-37.5`}
             value={category}
             onChange={e => setCategory(e.target.value)}
           >
@@ -86,7 +86,7 @@ export default function TransactionsPage({ openEdit, onDelete, expenses = [], lo
       </div>
 
       {/* ✅ Transactions List Card */}
-      <div className={`${cardBase} overflow-hidden`}>
+      <div className={`${cardBase} overflow-hidden min-w-0`}>
         <div className="p-4 md:p-5 flex items-center justify-between border-b border-black/5 dark:border-white/5">
           <div className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
             History
