@@ -17,7 +17,11 @@ dotenv.config();
 const app = expess();
 
 // MIDDLEWARE
-app.use(cors());
+app.use(cors({
+    origin: 'expense-tracker-woad-pi.vercel.app',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));
 app.use(expess.json());
 
 // DB CONFIG
