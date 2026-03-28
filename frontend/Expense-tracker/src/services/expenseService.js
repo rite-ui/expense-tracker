@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+    baseURL: import.meta.env.VITE_API_URL || 'https://expense-tracker-4xp5.onrender.com',
 })
 
 //Auto attach JWT token to every request
@@ -34,7 +34,7 @@ export const getCategoryBreakdown = () => API.get('api/expenses/summary/category
 //csv export
 export const exportCSV = async () => {
     const auth = JSON.parse(localStorage.getItem('expensio_auth') || '{}');
-    const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const baseURL = import.meta.env.VITE_API_URL || 'https://expense-tracker-4xp5.onrender.com';
     const res = await fetch(`${baseURL}/api/expenses/export/csv`, {
         headers: {
             Authorization: `Bearer ${auth.token}`,
