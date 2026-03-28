@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://expense-tracker-4xp5.onrender.com/api/:path*"
+    }
+  ]
+}
