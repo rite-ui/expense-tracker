@@ -2,7 +2,7 @@
 import { useTheme } from '../hooks/useTheme'
 import StatCard from '../components/ui/StatCard'
 import TransactionItem from '../components/ui/TransactionItem'
-import ChartTooltip from '../components/ui/ChartTooltip'
+import ChartTooltip from '../components/ui/Charttooltip'
 import Spinner from '../components/ui/Spinner'
 import { MONTH_NAMES, CAT_COLORS, INCOME_CATEGORIES } from '../utils/constants'
 import {
