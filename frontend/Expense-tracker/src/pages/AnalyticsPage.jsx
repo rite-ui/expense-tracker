@@ -1,6 +1,6 @@
 import { useTheme } from '../hooks/useTheme'
 import { useExpenses } from '../hooks/useExpenses'
-import ChartTooltip from '../components/ui/ChartTooltip'
+import ChartTooltip from '../components/ui/Charttooltip'
 import Spinner from '../components/ui/Spinner'
 // ✅ INCOME_CATEGORIES ko add kiya gaya hai
 import { MONTH_NAMES, CAT_COLORS, CAT_ICONS, INCOME_CATEGORIES } from '../utils/constants'
