@@ -18,7 +18,7 @@ const app = expess();
 
 // MIDDLEWARE
 app.use(cors({
-    origin: 'expense-tracker-woad-pi.vercel.app',
+    origin: 'https://expense-tracker-woad-pi.vercel.app',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
