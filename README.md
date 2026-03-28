@@ -19,8 +19,8 @@
 
 | Login & Security | Personal Dashboard |
 | :---: | :---: |
-| ![Login Page]("https://github.com/user-attachments/assets/ac0a7778-e1ea-415b-8ea0-6ad4e5e7f0e2")  | ![Dashboard]("https://github.com/user-attachments/assets/705e08af-a694-4ea0-8529-f1c910d2aeb7") |
-| ![Transaction page]("https://github.com/user-attachments/assets/f79ad1d1-6f85-40d4-9d99-7db84be2cf94") | ![Analytics Page]("https://github.com/user-attachments/assets/f79ad1d1-6f85-40d4-9d99-7db84be2cf94") |
+| ![Login Page](https://github.com/user-attachments/assets/ac0a7778-e1ea-415b-8ea0-6ad4e5e7f0e2)  | ![Dashboard](https://github.com/user-attachments/assets/705e08af-a694-4ea0-8529-f1c910d2aeb7) |
+| ![Transaction page](https://github.com/user-attachments/assets/f79ad1d1-6f85-40d4-9d99-7db84be2cf94) | ![Analytics Page](https://github.com/user-attachments/assets/f79ad1d1-6f85-40d4-9d99-7db84be2cf94) |
 
 ---
 
@@ -65,5 +65,9 @@ npm install
 # VITE_API_URL=http://localhost:3000
 npm run dev
 
-👨‍💻 Developed By
-Ritesh Github https://github.com/rite-ui | LinkedIn  https://www.linkedin.com/in/ritesh-ranjan-469a322b0/
+
+
+
+## 👨‍💻 Developed By
+**Ritesh** [GitHub Profile](https://github.com/rite-ui) | [LinkedIn](https://www.linkedin.com/in/ritesh-ranjan-469a322b0/)
+
